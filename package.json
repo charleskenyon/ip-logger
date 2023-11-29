@@ -1,0 +1,20 @@
+{
+  "name": "ip-logger",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.0",
+    "ts-node": "^10.9.1"
+  },
+  "scripts": {
+    "dev": "ts-node --project ./tsconfig.json --files src/run.ts"
+  }
+}

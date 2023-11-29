@@ -1,0 +1,15 @@
+config
+scripts
+jest.config.js
+next.config.js
+node_modules
+dist
+.eslintrc.js
+.prettierrc.js
+.parcel-cache
+webpack.config.js
+
+# cdk
+cdk.out
+infrastructure/**/*.js
+infrastructure/**/*.d.ts
