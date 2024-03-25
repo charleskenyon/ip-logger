@@ -1,20 +1,20 @@
 {
-    "compilerOptions": {
-      "outDir": "dist",
-      "sourceMap": true,
-      "rootDir": "./src",
-      "module": "commonjs",
-      "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true,
-      "target": "es3",
-      "moduleResolution": "node",
-      "noImplicitAny": true,
-      "noImplicitThis": true,
-      "noUnusedLocals": false,
-      "noUnusedParameters": false,
-      "noImplicitReturns": true,
-      "noFallthroughCasesInSwitch": false,
-      "noImplicitUseStrict": true,
-      "skipLibCheck": true,
-  },
+  "compilerOptions": {
+    "outDir": "dist",
+    "sourceMap": true,
+    // "rootDir": "./src",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es3",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitUseStrict": true,
+    "skipLibCheck": true
+  }
 }

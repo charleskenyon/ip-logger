@@ -8,8 +8,3 @@ dist
 .prettierrc.js
 .parcel-cache
 webpack.config.js
-
-# cdk
-cdk.out
-infrastructure/**/*.js
-infrastructure/**/*.d.ts
