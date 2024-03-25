@@ -15,6 +15,9 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": false,
     "noImplicitUseStrict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@ip-logger/core/*": ["./packages/core/src/*"]
+    }
   }
 }

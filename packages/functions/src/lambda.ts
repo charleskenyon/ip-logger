@@ -1,4 +1,4 @@
-import { func1, nums } from './module';
+import { func1, nums } from '@ip-logger/core/module';
 
 export const handler = async () => {
   return {
