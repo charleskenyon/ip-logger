@@ -1,13 +1,9 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
-    "sourceMap": true,
-    // "rootDir": "./src",
-    "module": "commonjs",
+    // "module": "esnext",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es3",
-    "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noUnusedLocals": false,
@@ -15,7 +11,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": false,
     "noImplicitUseStrict": true,
-    "skipLibCheck": true,
     "paths": {
       "@ip-logger/core/*": ["./packages/core/src/*"]
     }
