@@ -30,7 +30,6 @@
     "remove": "sst remove"
   },
   "dependencies": {
-    "ramda": "^0.29.1",
-    "uuid": "^9.0.1"
+    "ramda": "^0.29.1"
   }
 }
