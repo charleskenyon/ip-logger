@@ -8,14 +8,16 @@ export const handler = async (): Promise<SendMessageResult[]> => {
     new ScanCommand({ TableName: DOMAINS_TABLE_NAME })
   );
 
-  const domainItems = getFormattedDynamoDbItems<{ url: string }>(domainsData);
+  const domainItems = getFormattedDynamoDbItems<{ domain: string }>(
+    domainsData
+  );
 
   return Promise.all(
-    domainItems.map(({ url }) =>
+    domainItems.map(({ domain }) =>
       AWS.sqsClient.send(
         new SendMessageCommand({
           QueueUrl: process.env.QUEUE_URL,
-          MessageBody: url,
+          MessageBody: domain,
         })
       )
     )

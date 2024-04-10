@@ -1,7 +1,8 @@
-import { StackContext, Function, Table, Queue } from 'sst/constructs';
+import { StackContext, Function, Table, Queue, Cron } from 'sst/constructs';
 import { RemovalPolicy } from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 
 const dynamoDbBaseSettings = {
   removalPolicy: RemovalPolicy.DESTROY,
@@ -11,6 +12,10 @@ const dynamoDbBaseSettings = {
 };
 
 export function IpLoggerStack({ stack }: StackContext) {
+  stack.setDefaultFunctionProps({
+    runtime: 'nodejs20.x',
+  });
+
   new Table(stack, 'Domains', {
     fields: {
       domain: 'string',
@@ -28,20 +33,21 @@ export function IpLoggerStack({ stack }: StackContext) {
     fields: {
       ip: 'string',
       domain: 'string',
+      dateAdded: 'string',
+      dateUpdated: 'string',
+      returnCount: 'number',
     },
     primaryIndex: { partitionKey: 'ip', sortKey: 'domain' },
     cdk: {
       table: {
-        removalPolicy: RemovalPolicy.DESTROY,
+        ...dynamoDbBaseSettings,
         tableName: 'ip-logger-ips-table',
-        billingMode: dynamodb.BillingMode.PROVISIONED,
-        readCapacity: 1,
-        writeCapacity: 1,
       },
     },
   });
 
   const domainsQueue = new Queue(stack, 'DomainsQueue', {
+    // add consumer and function (scraper) inline
     cdk: {
       queue: {
         queueName: 'ip-logger-domains-queue',
@@ -49,12 +55,21 @@ export function IpLoggerStack({ stack }: StackContext) {
     },
   });
 
-  const iteratorLambda = new Function(stack, 'IteratorLambda', {
-    handler: 'packages/functions/src/iterator.handler',
-    runtime: 'nodejs20.x',
-    functionName: 'ip-logger-iterator-lambda',
-    environment: {
-      QUEUE_URL: domainsQueue.queueUrl,
+  const iteratorLambda = new Cron(stack, 'IteratorLambda', {
+    schedule: 'rate(1 minute)',
+    cdk: {
+      rule: {
+        ruleName: 'ip-logger-iterator-lambda-cron',
+      },
+    },
+    job: {
+      function: {
+        handler: 'packages/functions/src/iterator.handler',
+        functionName: 'ip-logger-iterator-lambda',
+        environment: {
+          QUEUE_URL: domainsQueue.queueUrl,
+        },
+      },
     },
   });
 
@@ -63,22 +78,43 @@ export function IpLoggerStack({ stack }: StackContext) {
   domainsQueue.attachPermissions([
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
-      principals: [new iam.ArnPrincipal(iteratorLambda.role.roleArn)],
+      principals: [
+        new iam.ArnPrincipal(iteratorLambda.jobFunction.role.roleArn),
+      ],
       actions: ['sqs:SendMessage'],
       resources: [domainsQueue.queueArn],
     }),
   ]);
 
-  new Function(stack, 'ScraperLambda', {
+  const scraperLambda = new Function(stack, 'ScraperLambda', {
     handler: 'packages/functions/src/scraper.handler',
-    runtime: 'nodejs20.x',
     functionName: 'ip-logger-scraper-lambda',
+    bind: [domainsQueue],
     environment: {
       QUEUE_URL: domainsQueue.queueUrl,
     },
   });
+
+  scraperLambda.attachPermissions(['dynamodb:UpdateItem', 'sqs:DeleteMessage']); // lock down to specific table and queue
+
+  domainsQueue.attachPermissions([
+    new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ArnPrincipal(scraperLambda.role.roleArn)],
+      actions: ['sqs:DeleteMessage'],
+      resources: [domainsQueue.queueArn],
+    }),
+  ]);
+
+  scraperLambda.addEventSource(
+    new SqsEventSource(domainsQueue.cdk.queue, {
+      batchSize: 1,
+    })
+  );
 }
 
-// https://glastonbury.seetickets.com/content/extras
+// queue.addConsumer(props.stack, "src/function.handler");
 
-// add xray, backup table before destruction
+// https://glastonbury.seetickets.com
+
+// TODOadd xray, backup table before destruction, add dev env

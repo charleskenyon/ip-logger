@@ -7,5 +7,6 @@ const AWS = {
 };
 
 const DOMAINS_TABLE_NAME = 'ip-logger-domains-table';
+const IPS_TABLE_NAME = 'ip-logger-ips-table';
 
-export { AWS, DOMAINS_TABLE_NAME };
+export { AWS, DOMAINS_TABLE_NAME, IPS_TABLE_NAME };
