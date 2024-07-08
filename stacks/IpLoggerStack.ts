@@ -11,7 +11,7 @@ const dynamoDbBaseSettings = {
   writeCapacity: 1,
 };
 
-export function IpLoggerStack({ stack }: StackContext) {
+export function IpLoggerStack({ app, stack }: StackContext) {
   stack.setDefaultFunctionProps({
     runtime: 'nodejs20.x',
   });
@@ -24,7 +24,7 @@ export function IpLoggerStack({ stack }: StackContext) {
     cdk: {
       table: {
         ...dynamoDbBaseSettings,
-        tableName: 'ip-logger-domains-table',
+        tableName: `ip-logger-domains-table-${app.stage}`,
       },
     },
   });
@@ -41,7 +41,7 @@ export function IpLoggerStack({ stack }: StackContext) {
     cdk: {
       table: {
         ...dynamoDbBaseSettings,
-        tableName: 'ip-logger-ips-table',
+        tableName: `ip-logger-ips-table-${app.stage}`,
       },
     },
   });
@@ -50,13 +50,14 @@ export function IpLoggerStack({ stack }: StackContext) {
     // add consumer and function (scraper) inline
     cdk: {
       queue: {
-        queueName: 'ip-logger-domains-queue',
+        queueName: `ip-logger-domains-queue-${app.stage}`,
       },
     },
   });
 
   const iteratorLambda = new Cron(stack, 'IteratorLambda', {
     schedule: 'rate(1 minute)',
+    enabled: app.stage === 'prod' ? true : false,
     cdk: {
       rule: {
         ruleName: 'ip-logger-iterator-lambda-cron',
@@ -65,7 +66,7 @@ export function IpLoggerStack({ stack }: StackContext) {
     job: {
       function: {
         handler: 'packages/functions/src/iterator.handler',
-        functionName: 'ip-logger-iterator-lambda',
+        functionName: `ip-logger-iterator-lambda-${app.stage}`,
         environment: {
           QUEUE_URL: domainsQueue.queueUrl,
         },
@@ -88,7 +89,7 @@ export function IpLoggerStack({ stack }: StackContext) {
 
   const scraperLambda = new Function(stack, 'ScraperLambda', {
     handler: 'packages/functions/src/scraper.handler',
-    functionName: 'ip-logger-scraper-lambda',
+    functionName: `ip-logger-scraper-lambda-${app.stage}`,
     bind: [domainsQueue],
     environment: {
       QUEUE_URL: domainsQueue.queueUrl,
@@ -113,8 +114,6 @@ export function IpLoggerStack({ stack }: StackContext) {
   );
 }
 
-// queue.addConsumer(props.stack, "src/function.handler");
-
 // https://glastonbury.seetickets.com
 
-// TODOadd xray, backup table before destruction, add dev env
+// TODOadd xray, backup table before destruction, add dev env (dev mode?), lock down table permissions

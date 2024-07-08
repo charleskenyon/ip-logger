@@ -20,15 +20,14 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
     "prettier": "^3.1.0",
-    "sst": "2.41.4",
+    "sst": "^2.43.3",
     "ts-node": "^10.9.1"
   },
   "scripts": {
-    "dev": "ts-node --project ./tsconfig.json --files packages/core/src/run.ts",
-    "sst-dev": "sst dev",
-    "build": "sst build --verbose true",
+    "dev": "./run-dev-with-teardown.sh",
+    "build": "sst build --verbose=true",
     "deploy": "sst deploy",
-    "remove": "sst remove"
+    "remove-dev": "sst remove"
   },
   "dependencies": {
     "ramda": "^0.29.1"

@@ -1,5 +1,5 @@
 import type { SSTConfig } from 'sst';
-import { IpLoggerStack } from './stacks/IpLoggerStack';
+import { IpLoggerStack, AfterDeployStack } from './stacks';
 
 const config: SSTConfig = {
   // config(input) {
@@ -11,6 +11,7 @@ const config: SSTConfig = {
   },
   stacks(app) {
     app.stack(IpLoggerStack);
+    app.stack(AfterDeployStack);
   },
 };
 
