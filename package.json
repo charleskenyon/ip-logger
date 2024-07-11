@@ -16,6 +16,7 @@
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
+    "aws-xray-sdk-core": "^3.9.0",
     "eslint": "^8.54.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
@@ -27,7 +28,7 @@
     "dev": "./run-dev-with-teardown.sh",
     "build": "sst build --verbose=true",
     "deploy": "sst deploy",
-    "remove-dev": "sst remove"
+    "remove": "sst remove"
   },
   "dependencies": {
     "ramda": "^0.29.1"

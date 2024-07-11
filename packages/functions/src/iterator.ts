@@ -12,7 +12,7 @@ export const handler = async (): Promise<SendMessageResult[]> => {
     domainsData
   );
 
-  return Promise.all(
+  const sendMessageResponses = Promise.all(
     domainItems.map(({ domain }) =>
       AWS.sqsClient.send(
         new SendMessageCommand({
@@ -22,4 +22,8 @@ export const handler = async (): Promise<SendMessageResult[]> => {
       )
     )
   );
+
+  console.log('sendMessageResponses', sendMessageResponses);
+
+  return sendMessageResponses;
 };

@@ -8,4 +8,4 @@ function teardown {
 
 trap teardown SIGINT
 
-sst dev --stage=dev --verbose=true
+sst dev --stage=dev
