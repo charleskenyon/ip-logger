@@ -6,7 +6,7 @@ const prePopulateDomainsTable = async () => {
     new PutItemCommand({
       TableName: DOMAINS_TABLE_NAME,
       Item: {
-        domain: { S: 'https://glastonbury.seetickets.com' },
+        domain: { S: 'google.com' },
       },
     })
   );

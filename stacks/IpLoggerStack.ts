@@ -16,7 +16,7 @@ export function IpLoggerStack({ app, stack }: StackContext) {
     runtime: 'nodejs20.x',
   });
 
-  new Table(stack, 'Domains', {
+  const domainsTable = new Table(stack, 'Domains', {
     fields: {
       domain: 'string',
     },
@@ -29,7 +29,7 @@ export function IpLoggerStack({ app, stack }: StackContext) {
     },
   });
 
-  new Table(stack, 'Ips', {
+  const ipsTable = new Table(stack, 'Ips', {
     fields: {
       ip: 'string',
       domain: 'string',
@@ -47,7 +47,6 @@ export function IpLoggerStack({ app, stack }: StackContext) {
   });
 
   const domainsQueue = new Queue(stack, 'DomainsQueue', {
-    // add consumer and function (scraper) inline
     cdk: {
       queue: {
         queueName: `ip-logger-domains-queue-${app.stage}`,
@@ -56,7 +55,7 @@ export function IpLoggerStack({ app, stack }: StackContext) {
   });
 
   const iteratorLambda = new Cron(stack, 'IteratorLambda', {
-    schedule: 'rate(1 minute)',
+    schedule: 'rate(10 minutes)',
     enabled: app.stage === 'prod' ? true : false,
     cdk: {
       rule: {
@@ -74,7 +73,21 @@ export function IpLoggerStack({ app, stack }: StackContext) {
     },
   });
 
-  iteratorLambda.attachPermissions(['dynamodb:Scan', 'sqs:SendMessage']);
+  iteratorLambda.jobFunction.addToRolePolicy(
+    new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['dynamodb:Scan'],
+      resources: [domainsTable.tableArn],
+    })
+  );
+
+  iteratorLambda.jobFunction.addToRolePolicy(
+    new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['sqs:SendMessage'],
+      resources: [domainsQueue.queueArn],
+    })
+  );
 
   domainsQueue.attachPermissions([
     new iam.PolicyStatement({
@@ -96,7 +109,21 @@ export function IpLoggerStack({ app, stack }: StackContext) {
     },
   });
 
-  scraperLambda.attachPermissions(['dynamodb:UpdateItem', 'sqs:DeleteMessage']); // lock down to specific table and queue
+  scraperLambda.addToRolePolicy(
+    new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['dynamodb:UpdateItem'],
+      resources: [ipsTable.tableArn],
+    })
+  );
+
+  scraperLambda.addToRolePolicy(
+    new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['sqs:DeleteMessage'],
+      resources: [domainsQueue.queueArn],
+    })
+  );
 
   domainsQueue.attachPermissions([
     new iam.PolicyStatement({
@@ -114,6 +141,5 @@ export function IpLoggerStack({ app, stack }: StackContext) {
   );
 }
 
-// https://glastonbury.seetickets.com
-
-// TODOadd xray, backup table before destruction, add dev env (dev mode?), lock down table permissions
+// TODOadd ackup table before destruction
+// const { CreateBackupCommand } = require("@aws-sdk/client-dynamodb-backup");
