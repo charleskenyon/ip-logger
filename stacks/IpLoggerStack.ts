@@ -12,6 +12,8 @@ const dynamoDbBaseSettings = {
 };
 
 export function IpLoggerStack({ app, stack }: StackContext) {
+  const isProd = app.stage === 'prod';
+
   stack.setDefaultFunctionProps({
     runtime: 'nodejs20.x',
   });
@@ -25,6 +27,7 @@ export function IpLoggerStack({ app, stack }: StackContext) {
       table: {
         ...dynamoDbBaseSettings,
         tableName: `ip-logger-domains-table-${app.stage}`,
+        pointInTimeRecovery: isProd ? true : false,
       },
     },
   });
@@ -42,6 +45,7 @@ export function IpLoggerStack({ app, stack }: StackContext) {
       table: {
         ...dynamoDbBaseSettings,
         tableName: `ip-logger-ips-table-${app.stage}`,
+        pointInTimeRecovery: isProd ? true : false,
       },
     },
   });
@@ -56,7 +60,7 @@ export function IpLoggerStack({ app, stack }: StackContext) {
 
   const iteratorLambda = new Cron(stack, 'IteratorLambda', {
     schedule: 'rate(10 minutes)',
-    enabled: app.stage === 'prod' ? true : false,
+    enabled: isProd ? true : false,
     cdk: {
       rule: {
         ruleName: 'ip-logger-iterator-lambda-cron',
@@ -141,5 +145,5 @@ export function IpLoggerStack({ app, stack }: StackContext) {
   );
 }
 
-// TODOadd ackup table before destruction
+// TODOadd backup table before destruction, add README, export resources to AfterDeployStack
 // const { CreateBackupCommand } = require("@aws-sdk/client-dynamodb-backup");
