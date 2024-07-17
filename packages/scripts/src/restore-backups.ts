@@ -1,5 +1,4 @@
 import {
-  PutItemCommand,
   RestoreTableFromBackupCommand,
   ListBackupsCommand,
   DeleteTableCommand,
@@ -11,19 +10,6 @@ import {
   DOMAINS_TABLE_NAME,
   IPS_TABLE_NAME,
 } from '@ip-logger/core/constants';
-
-const prePopulateDomainsTable = async () => {
-  const putItemResponse = await AWS.dynamoDbClient.send(
-    new PutItemCommand({
-      TableName: DOMAINS_TABLE_NAME,
-      Item: {
-        domain: { S: 'google.com' },
-      },
-    })
-  );
-  console.log('putItemResponse', putItemResponse);
-  return putItemResponse;
-};
 
 const restoreBackups = async () => {
   const restoreBackupResponses = await Promise.all(
@@ -52,7 +38,10 @@ const restoreBackups = async () => {
         ); // delete newly created empty table as there is backup
 
         await waitUntilTableNotExists(
-          { client: AWS.dynamoDbClient, maxWaitTime: 600 },
+          {
+            client: AWS.dynamoDbClient,
+            maxWaitTime: 30,
+          },
           { TableName: tableName }
         );
 
@@ -71,4 +60,4 @@ const restoreBackups = async () => {
   return restoreBackupResponses;
 };
 
-export { prePopulateDomainsTable, restoreBackups };
+export default restoreBackups;

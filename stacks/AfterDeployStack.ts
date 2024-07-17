@@ -5,13 +5,13 @@ export function AfterDeployStack({ app, stack }: StackContext) {
   dependsOn(IpLoggerStack);
   if (app.stage === 'dev') {
     const script = new Script(stack, 'AfterDeployDev', {
-      onCreate: 'packages/script.prePopulateDomainsTable',
+      onCreate: 'packages/scripts/src/index.prePopulateDomainsTable',
     });
     script.attachPermissions(['dynamodb:PutItem']);
   }
   if (app.stage === 'prod') {
     const script = new Script(stack, 'AfterDeployProd', {
-      onCreate: 'packages/script.restoreBackups',
+      onCreate: 'packages/scripts/src/index.restoreBackups',
     });
     script.attachPermissions([
       'dynamodb:ListBackups',
@@ -24,6 +24,7 @@ export function AfterDeployStack({ app, stack }: StackContext) {
       'dynamodb:Scan',
       'dynamodb:BatchWriteItem',
       'dynamodb:DeleteTable',
+      'dynamodb:DescribeTable',
     ]);
   }
 }
