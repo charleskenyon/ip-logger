@@ -2,7 +2,6 @@ import type { SSTConfig } from 'sst';
 import { IpLoggerStack, AfterDeployStack } from './stacks';
 
 const config: SSTConfig = {
-  // config(input) {
   config() {
     return {
       name: 'ip-logger',

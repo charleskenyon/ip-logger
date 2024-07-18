@@ -143,7 +143,8 @@ export function IpLoggerStack({ app, stack }: StackContext) {
       batchSize: 1,
     })
   );
-}
 
-// TODOadd backup table before destruction, add README, export resources to AfterDeployStack
-// const { CreateBackupCommand } = require("@aws-sdk/client-dynamodb-backup");
+  return {
+    domainsTable,
+  };
+}
